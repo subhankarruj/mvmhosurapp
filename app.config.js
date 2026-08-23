@@ -21,7 +21,7 @@ const IS_PRODUCTION_BUILD = process.env.EAS_BUILD_PROFILE === 'production';
 module.exports = {
   expo: {
     name: 'MVM',
-    slug: 'JMDSchoolDesk',
+    slug: 'jmd',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -87,10 +87,10 @@ module.exports = {
     runtimeVersion: {
       policy: 'appVersion',
     },
-    owner: 'abhilash0320',
+    owner: 'subhankarjmds-team',
     extra: {
       eas: {
-        projectId: '77af3f22-ffe2-43c3-a4b7-7b6de49cbe29',
+        projectId: '092cc53b-67a0-4d2e-a9c9-94378ecfcfaf',
       },
       // Runtime API config — read via expo-constants in apiService.js instead
       // of hardcoding endpoints in source. Backend runs behind IIS with a
