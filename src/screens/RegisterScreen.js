@@ -14,6 +14,11 @@ import { getExpoPushToken } from '../services/notificationService';
 import { useUser } from '../context/UserContext';
 import { SHADOWS, platformShadow } from '../utils/shadow';
 import { s, ms, fs } from '../utils/responsive';
+import LegalModal from '../components/LegalModal';
+import {
+  PRIVACY_POLICY_SECTIONS, PRIVACY_POLICY_UPDATED,
+  TERMS_SECTIONS, TERMS_UPDATED,
+} from '../constants/legalText';
 
 const webInputStyle = Platform.select({ web: { outlineWidth: 0, outlineStyle: 'none', outlineColor: 'transparent', boxShadow: 'none' } }) ?? {};
 
@@ -53,6 +58,8 @@ function validate(fields) {
   if (!fields.confirm)                  e.confirm  = 'Please confirm your password.';
   else if (fields.confirm !== fields.password) e.confirm = 'Passwords do not match.';
 
+  if (!fields.agreedToTerms) e.agreedToTerms = 'Please agree to the Terms & Conditions and Privacy Policy to continue.';
+
   return e;
 }
 
@@ -68,6 +75,9 @@ export default function RegisterScreen({ navigation }) {
   const [confirm, setConfirm]   = useState('');
   const [showPass, setShowPass] = useState(false);
   const [showConf, setShowConf] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal]   = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [errors, setErrors]     = useState({});
   const [loading, setLoading]   = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -96,7 +106,7 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const handleRegister = async () => {
-    const e = validate({ name, phone, attendanceEnabled, busTrackingEnabled, busStop, password, confirm });
+    const e = validate({ name, phone, attendanceEnabled, busTrackingEnabled, busStop, password, confirm, agreedToTerms });
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
@@ -291,6 +301,26 @@ export default function RegisterScreen({ navigation }) {
             {errors.confirm ? <Text style={styles.fieldError}>{errors.confirm}</Text> : null}
           </View>
 
+          {/* Terms & Privacy consent */}
+          <View style={styles.inputGroup}>
+            <TouchableOpacity
+              style={styles.consentRow}
+              activeOpacity={0.7}
+              onPress={() => { setAgreedToTerms(v => !v); if (errors.agreedToTerms) clearErr('agreedToTerms'); }}
+            >
+              <View style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}>
+                {agreedToTerms ? <Text style={styles.checkboxTick}>✓</Text> : null}
+              </View>
+              <Text style={styles.consentText}>
+                I agree to the{' '}
+                <Text style={styles.consentLink} onPress={() => setShowTermsModal(true)}>Terms & Conditions</Text>
+                {' '}and{' '}
+                <Text style={styles.consentLink} onPress={() => setShowPrivacyModal(true)}>Privacy Policy</Text>
+              </Text>
+            </TouchableOpacity>
+            {errors.agreedToTerms ? <Text style={styles.fieldError}>{errors.agreedToTerms}</Text> : null}
+          </View>
+
           {/* Register button */}
           <TouchableOpacity
             style={[styles.registerBtn, loading && { opacity: 0.8 }]}
@@ -314,6 +344,21 @@ export default function RegisterScreen({ navigation }) {
       </ScrollView>
 
       <Text style={styles.footerText}>© 2026 JMD Technologies. All rights reserved.</Text>
+
+      <LegalModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        title="Terms & Conditions"
+        updatedLabel={TERMS_UPDATED}
+        sections={TERMS_SECTIONS}
+      />
+      <LegalModal
+        visible={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        title="Privacy Policy"
+        updatedLabel={PRIVACY_POLICY_UPDATED}
+        sections={PRIVACY_POLICY_SECTIONS}
+      />
     </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -387,6 +432,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   toggleLabel: { fontSize: fs(14), fontWeight: '600', color: COLORS.textDark },
+
+  // Terms & Privacy consent
+  consentRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  checkbox: {
+    width: ms(20), height: ms(20), borderRadius: ms(5),
+    borderWidth: 1.5, borderColor: COLORS.border,
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: ms(10), marginTop: ms(1),
+    backgroundColor: '#FAFAFA',
+  },
+  checkboxChecked: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
+  checkboxTick: { color: '#FFFFFF', fontSize: fs(13), fontWeight: '800' },
+  consentText: { flex: 1, fontSize: fs(13), lineHeight: fs(19), color: COLORS.textGray },
+  consentLink: { color: COLORS.primary, fontWeight: '700' },
 
   // Button
   registerBtn: {
