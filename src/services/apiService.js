@@ -1,4 +1,6 @@
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { ERR_SESSION_EXPIRED } from '../constants/errors';
 
@@ -15,20 +17,31 @@ const FORCE_PRODUCTION = false;
 export const BASE_URL = (FORCE_PRODUCTION || !__DEV__) ? PROD_URL : LOCAL_URL;
 
 // ─── Token storage keys ───────────────────────────────────────────────────────
-const KEY_ACCESS  = '@jmd_access_token';
-const KEY_REFRESH = '@jmd_refresh_token';
+// Access/refresh tokens live in expo-secure-store (OS keychain/Keystore,
+// encrypted at rest) — NOT AsyncStorage, which is plain unencrypted disk
+// storage readable by anything with filesystem access on a rooted/jailbroken
+// device. SecureStore key names may only contain [A-Za-z0-9._-], so these
+// can't reuse the '@jmd_...' prefix the AsyncStorage keys below use.
+// SecureStore has no web implementation, so web falls back to AsyncStorage —
+// there's no OS keychain to use there anyway.
+const KEY_ACCESS  = 'jmd_access_token';
+const KEY_REFRESH = 'jmd_refresh_token';
 const KEY_USER    = '@jmd_user';
+
+const tokenStore = Platform.OS === 'web'
+  ? { setItemAsync: AsyncStorage.setItem, getItemAsync: AsyncStorage.getItem, deleteItemAsync: AsyncStorage.removeItem }
+  : SecureStore;
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 export async function saveTokens(accessToken, refreshToken) {
-  await AsyncStorage.multiSet([
-    [KEY_ACCESS,  accessToken],
-    [KEY_REFRESH, refreshToken],
+  await Promise.all([
+    tokenStore.setItemAsync(KEY_ACCESS,  accessToken),
+    tokenStore.setItemAsync(KEY_REFRESH, refreshToken),
   ]);
 }
 
-export async function getAccessToken()  { return AsyncStorage.getItem(KEY_ACCESS); }
-export async function getRefreshToken() { return AsyncStorage.getItem(KEY_REFRESH); }
+export async function getAccessToken()  { return tokenStore.getItemAsync(KEY_ACCESS); }
+export async function getRefreshToken() { return tokenStore.getItemAsync(KEY_REFRESH); }
 
 export async function saveUser(user) {
   await AsyncStorage.setItem(KEY_USER, JSON.stringify(user));
@@ -39,7 +52,11 @@ export async function getUser() {
 }
 
 export async function clearSession() {
-  await AsyncStorage.multiRemove([KEY_ACCESS, KEY_REFRESH, KEY_USER]);
+  await Promise.all([
+    tokenStore.deleteItemAsync(KEY_ACCESS),
+    tokenStore.deleteItemAsync(KEY_REFRESH),
+    AsyncStorage.removeItem(KEY_USER),
+  ]);
 }
 
 // ─── Timeout fetch (AbortController — works in all RN/Hermes versions) ────────

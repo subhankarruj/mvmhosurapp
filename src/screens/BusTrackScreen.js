@@ -234,6 +234,19 @@ const MAP_HTML = `<!DOCTYPE html>
     if (pendingStop)  { highlightMyStop(pendingStop); pendingStop = null; }
   });
 
+  // ── Escape untrusted strings (bus stop names, arrival times — all come
+  // from the backend DB) before building raw HTML via setHTML(). setText()
+  // is already safe on its own; this is only needed for the setHTML() calls
+  // below. ─────────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ── Compass heading between two GPS points ────────────────────
   function computeHeading(lat1, lon1, lat2, lon2) {
     var dLon = (lon2 - lon1) * Math.PI / 180;
@@ -493,7 +506,7 @@ const MAP_HTML = `<!DOCTYPE html>
       var m = new maplibregl.Marker({element:el, anchor:'center'})
         .setLngLat([parseFloat(stop.longitude), parseFloat(stop.latitude)])
         .setPopup(new maplibregl.Popup({offset:10}).setHTML(
-          '<b>'+stop.stop_name+'</b>'+(stop.arrival_time?'<br><small>⏰ '+stop.arrival_time+'</small>':'')
+          '<b>'+escapeHtml(stop.stop_name)+'</b>'+(stop.arrival_time?'<br><small>⏰ '+escapeHtml(stop.arrival_time)+'</small>':'')
         ))
         .addTo(map);
       stopMarkers[stop.stop_name] = {marker:m, el:el};
@@ -529,7 +542,7 @@ const MAP_HTML = `<!DOCTYPE html>
         el.style.border = '3px solid #EF6C00';
         el.style.width = '20px'; el.style.height = '20px';
         stopMarkers[name].marker.getPopup()
-          .setHTML('<b>📍 Your Stop</b><br>'+name);
+          .setHTML('<b>📍 Your Stop</b><br>'+escapeHtml(name));
       }
     });
   }

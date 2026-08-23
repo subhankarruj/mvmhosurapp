@@ -88,15 +88,6 @@ export const ONELAP_CONFIG = {
 };
 ```
 
-### Demo Login Credentials
-
-For testing without a live backend:
-
-| Field | Value |
-|-------|-------|
-| Mobile | `7347845062` |
-| Password | `123456` |
-
 ---
 
 ## Running the App
@@ -191,7 +182,6 @@ JMD-School-Desk/
 - Password field with show/hide eye toggle (left side)
 - Real-time inline field validation on blur
 - Connects to backend JWT authentication
-- Demo credentials bypass for testing (`7347845062` / `123456`)
 
 ### 3. Home Screen
 - Dynamic school name from logged-in user's profile

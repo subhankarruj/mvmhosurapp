@@ -4,6 +4,19 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Tokens now live in expo-secure-store (see apiService.js) — no official
+// jest mock ships for it, so mirror the AsyncStorage mock's behavior with a
+// tiny in-memory Map. resetAll() gives each test a clean slate.
+jest.mock('expo-secure-store', () => {
+  const store = new Map();
+  return {
+    setItemAsync: jest.fn((key, value) => { store.set(key, value); return Promise.resolve(); }),
+    getItemAsync: jest.fn((key) => Promise.resolve(store.has(key) ? store.get(key) : null)),
+    deleteItemAsync: jest.fn((key) => { store.delete(key); return Promise.resolve(); }),
+    __resetAll: () => store.clear(),
+  };
+});
+
 jest.mock('expo-constants', () => ({
   __esModule: true,
   default: {
@@ -76,6 +89,7 @@ function malformedJsonResponse(status) {
 describe('apiService', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
+    require('expo-secure-store').__resetAll();
     global.fetch = jest.fn();
   });
 
