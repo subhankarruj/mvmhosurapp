@@ -44,7 +44,12 @@ module.exports = {
       [
         'expo-location',
         {
-          locationAlwaysAndWhenInUsePermission: 'MVM needs your location to alert you when the school bus is approaching your stop.',
+          // Only requestForegroundPermissionsAsync() is ever called in code
+          // (see locationService.js) — no background/"always" location is
+          // actually requested, so only the when-in-use description is set.
+          // Setting an unused "Always" description here previously implied
+          // background tracking that doesn't exist, which is exactly the
+          // kind of code/behavior mismatch Play Store review flags.
           locationWhenInUsePermission: 'MVM needs your location to alert you when the school bus is approaching your stop.',
         },
       ],
@@ -52,22 +57,22 @@ module.exports = {
     ],
     ios: {
       supportsTablet: false,
-      bundleIdentifier: 'com.jmd.schooldesk',
+      bundleIdentifier: 'com.mvm.hosur',
       infoPlist: {
         NSLocationWhenInUseUsageDescription: 'MVM needs your location to alert you when the school bus is approaching your stop.',
-        NSLocationAlwaysAndWhenInUseUsageDescription: 'MVM needs your location to alert you when the school bus is approaching your stop.',
       },
     },
     android: {
-      package: 'com.jmd.schooldesk',
+      package: 'com.mvm.hosur',
       usesCleartextTraffic: !IS_PRODUCTION_BUILD,
+      // RECEIVE_BOOT_COMPLETED removed — nothing in this app reschedules
+      // local alarms/notifications on boot (push delivery is server-side via
+      // Expo's own push service), so it was an unused, unjustifiable
+      // permission that Play Store review scrutinizes.
       permissions: [
         'ACCESS_FINE_LOCATION',
         'ACCESS_COARSE_LOCATION',
-        'RECEIVE_BOOT_COMPLETED',
         'VIBRATE',
-        'android.permission.ACCESS_COARSE_LOCATION',
-        'android.permission.ACCESS_FINE_LOCATION',
       ],
       adaptiveIcon: {
         foregroundImage: './assets/android-icon-foreground.png',
