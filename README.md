@@ -1,6 +1,6 @@
-# MVM — React Native App
+# MVM-Hosur — Android App
 
-A mobile school app built with **React Native (Expo)** for students of **Maharishi Vidya Mandir, Hosur**. Provides JWT-authenticated login, read-only attendance (computed by the school's SmartOffice system), live bus tracking (via OneLap GPS on an interactive map), and push/in-app notifications.
+A mobile school app built for students of **Maharishi Vidya Mandir, Hosur**. Provides JWT-authenticated login, read-only attendance (computed by the school's SmartOffice system), live bus tracking (via OneLap GPS on an interactive map), and push/in-app notifications.
 
 ---
 
@@ -92,26 +92,6 @@ export const SCHOOL_CONFIG = {
 
 ---
 
-## Running the App
-
-```bash
-# Start the Expo development server
-npm start
-
-# Run on Android emulator
-npm run android
-
-# Run on iOS simulator (macOS only)
-npm run ios
-
-# Run in a web browser
-npm run web
-```
-
-After running `npm start`, scan the **QR code** with the **Expo Go** app on your phone to test on a real device (same WiFi network as your dev machine, matching `apiUrlLocal`).
-
----
-
 ## Building for Production
 
 ```bash
@@ -129,62 +109,6 @@ eas build --platform android --profile production
 ```
 
 Both build profiles are defined in `eas.json`. `production` uses `apiUrl` (HTTPS) with cleartext traffic disabled; `preview` also uses `apiUrl` now that the backend is on real HTTPS.
-
----
-
-## Project Structure
-
-```
-mvmhosurapp/
-├── src/
-│   ├── screens/
-│   │   ├── SplashScreen.js
-│   │   ├── LoginScreen.js
-│   │   ├── RegisterScreen.js
-│   │   ├── HomeScreen.js
-│   │   ├── AttendanceScreen.js
-│   │   ├── BusTrackScreen.js
-│   │   ├── NotificationScreen.js
-│   │   ├── NotificationSettingsScreen.js
-│   │   ├── ProfileScreen.js
-│   │   └── ModuleScreen.js
-│   ├── navigation/
-│   │   ├── AppNavigator.js      # Root stack + bottom tab navigator
-│   │   └── RootNavigation.js
-│   ├── components/
-│   │   ├── BackButton.js
-│   │   ├── ErrorBoundary.js
-│   │   ├── EyeIcon.js
-│   │   ├── JMDLogo.js
-│   │   ├── PhoneCallIcon.js
-│   │   └── UpdateBanner.js
-│   ├── context/
-│   │   ├── UserContext.js           # Logged-in user state
-│   │   └── NotificationContext.js   # Notification list, unread count, push handling
-│   ├── services/
-│   │   ├── apiService.js         # Backend REST calls (auth, attendance, bus, notifications)
-│   │   ├── oneLapService.js      # Live bus GPS position (proxied through the backend)
-│   │   ├── cacheService.js       # AsyncStorage TTL cache (attendance offline fallback)
-│   │   ├── locationService.js    # Device location permission + GPS
-│   │   └── notificationService.js # Push notification permission + Expo push token
-│   ├── config/
-│   │   ├── appConfig.js          # School identity/location + OneLap public config
-│   │   └── secrets.example.js    # Template — copy to secrets.js (gitignored)
-│   ├── constants/
-│   │   ├── colors.js
-│   │   └── errors.js
-│   └── utils/
-│       ├── dateUtils.js          # IST timezone helpers
-│       ├── navigation.js         # Cross-navigator reset-to-Login helper
-│       ├── responsive.js         # Screen-size scaling helpers
-│       └── shadow.js             # Cross-platform shadow styles
-├── plugins/
-│   └── withCleartextTraffic.js   # Config plugin: allows plain HTTP for local dev only
-├── App.js                        # Root component
-├── app.config.js                 # Expo config (dynamic — reads EAS_BUILD_PROFILE)
-├── eas.json                      # EAS build profiles (preview/production)
-└── package.json
-```
 
 ---
 
