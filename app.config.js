@@ -1,22 +1,20 @@
 // Dynamic config (replaces app.json) so the Android cleartext-traffic
-// exception can be scoped to non-production builds only — see AGENTS.md for
-// the SDK 56 docs this targets. EAS sets EAS_BUILD_PROFILE to the exact
+// exception can be scoped to genuine local development only — see AGENTS.md
+// for the SDK 56 docs this targets. EAS sets EAS_BUILD_PROFILE to the exact
 // profile name ('preview' or 'production') for every `eas build`; it's unset
-// for local `expo start`.
+// for local `expo start` / `expo run:android`.
 //
 //   - local dev        → apiUrlLocal (LAN, http) is what's actually used,
-//                         see BASE_URL in apiService.js — cleartext enabled.
-//   - preview build     → the backend at 3.108.191.155 isn't behind HTTPS on
-//                         this port yet, so this profile points apiUrl at
-//                         the plain-HTTP endpoint too, with the same
-//                         cleartext exception as local dev. TEMPORARY, for
-//                         internal device testing only — see the note by
-//                         `apiUrl` below before using this profile for
-//                         anything wider.
+//                         see BASE_URL in apiService.js — cleartext enabled,
+//                         since this build never leaves your machine.
+//   - preview build     → backend is now behind HTTPS (api.mvmhosurrfid.in,
+//                         Let's Encrypt via IIS), same as production — see
+//                         `apiUrl` below. No cleartext exception needed or
+//                         permitted; this APK goes onto real testers' phones.
 //   - production build  → apiUrl stays HTTPS-only, cleartext stays
 //                         disabled. Never point this profile at a plain-HTTP
 //                         backend.
-const IS_PRODUCTION_BUILD = process.env.EAS_BUILD_PROFILE === 'production';
+const IS_EAS_BUILD = !!process.env.EAS_BUILD_PROFILE;
 
 module.exports = {
   expo: {
@@ -32,7 +30,7 @@ module.exports = {
       resizeMode: 'contain',
     },
     plugins: [
-      ...(IS_PRODUCTION_BUILD ? [] : ['./plugins/withCleartextTraffic']),
+      ...(IS_EAS_BUILD ? [] : ['./plugins/withCleartextTraffic']),
       [
         'expo-notifications',
         {
@@ -64,7 +62,7 @@ module.exports = {
     },
     android: {
       package: 'com.mvm.hosur',
-      usesCleartextTraffic: !IS_PRODUCTION_BUILD,
+      usesCleartextTraffic: !IS_EAS_BUILD,
       // RECEIVE_BOOT_COMPLETED removed — nothing in this app reschedules
       // local alarms/notifications on boot (push delivery is server-side via
       // Expo's own push service), so it was an unused, unjustifiable
