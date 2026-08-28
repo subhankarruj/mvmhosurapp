@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
+import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Rect, Circle } from 'react-native-svg';
 import { SHADOWS } from '../utils/shadow';
@@ -30,6 +31,12 @@ const POLL_INTERVAL_MS      = 15_000; // REST polling interval for live bus posi
 const SCH_LAT  = SCHOOL_CONFIG.latitude;
 const SCH_LON  = SCHOOL_CONFIG.longitude;
 const SCH_NAME = SCHOOL_CONFIG.name;
+
+// CARTO now requires this for basemaps.cartocdn.com — see cartoApiKey in
+// app.config.js for why/how to get one. Empty string still "works" (CARTO
+// just serves the "API KEY REQUIRED" watermark instead of an error).
+const CARTO_API_KEY = Constants.expoConfig?.extra?.cartoApiKey || '';
+const CARTO_KEY_QS  = CARTO_API_KEY ? `?key=${CARTO_API_KEY}` : '';
 
 const MAP_HTML = `<!DOCTYPE html>
 <html>
@@ -93,10 +100,10 @@ const MAP_HTML = `<!DOCTYPE html>
           // always rendering baked-in place/road labels undersized and soft
           // — hardcoding @2x here is what actually serves the sharper tile.
           tiles: [
-            'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-            'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-            'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-            'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'
+            'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png${CARTO_KEY_QS}',
+            'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png${CARTO_KEY_QS}',
+            'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png${CARTO_KEY_QS}',
+            'https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png${CARTO_KEY_QS}'
           ],
           tileSize: 256,
           maxzoom: 20

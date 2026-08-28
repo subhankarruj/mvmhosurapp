@@ -103,6 +103,15 @@ module.exports = {
       // for local dev only.
       apiUrl: 'https://api.mvmhosurrfid.in/api',
       apiUrlLocal: 'http://192.168.1.137:5000/api',
+      // CARTO retired anonymous access to its Voyager raster basemap tiles
+      // (basemaps.cartocdn.com) — unauthenticated requests now get served an
+      // "API KEY REQUIRED" watermark instead of the real map, which is what
+      // BusTrackScreen was showing. A key is free (5M tile requests/month,
+      // fair-use) and not a backend secret — it's a client-side, rate-limited
+      // identifier meant to ship in the app bundle, same as a Google Maps
+      // client key. Get one at https://carto.com/basemaps/apikey/ and paste
+      // it here; see CARTO_API_KEY in BusTrackScreen.js for where it's used.
+      cartoApiKey: 'cb1_2h2s_1_7713a38a56cd244279948f4b',
     },
   },
 };
